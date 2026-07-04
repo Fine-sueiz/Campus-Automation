@@ -1,0 +1,8 @@
+fastapi==0.115.6
+uvicorn[standard]==0.34.0
+python-dateutil==2.9.0.post0
+tzdata==2025.2
+pytest==8.3.4
+httpx==0.28.1
+playwright==1.60.0
+pywinauto==0.6.9; platform_system == "Windows"

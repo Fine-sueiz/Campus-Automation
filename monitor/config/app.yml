@@ -1,0 +1,151 @@
+monitor:
+  feed_urls: []
+  werss:
+    enabled: false
+    base_url: "http://127.0.0.1:8001"
+  wechat2rss:
+    enabled: true
+    base_url: "http://127.0.0.1:8001"
+    token: "dev-wechat2rss-token"
+    discover_feeds: true
+    subscribe_ids:
+      - id: "1234567890"
+        name: "示例大学图书馆"
+    subscribe_article_urls:
+      - "https://mp.weixin.qq.com/s/EXAMPLE"
+  keywords:
+    required_any:
+      - 勤工助学
+    focus_any:
+      - 勤工助学
+  check_interval_seconds: 600
+  article_timeout_seconds: 15
+  fetch_article_html: true
+
+opportunity:
+  enabled_categories:
+    - work_study
+  required_any:
+    - 勤工助学
+  extra_keywords:
+    - 勤工助学
+
+volunteer:
+  enabled: true
+  source_accounts:
+    - "示例大学青年志愿者"
+    - "示例大学学生服务中心"
+  confirm_by_email: true
+  required_any:
+    - 志愿服务
+    - 志愿活动
+    - 志愿者
+    - 志愿时长
+  focus_any:
+    - 报名
+    - 招募
+    - 参加
+    - 志愿时长
+  notify_email: "you@example.com"
+  token_expires_hours: 48
+  allow_submit_when_schedule_conflict: false
+
+calendar_sync:
+  enabled: true
+  api_base: "http://127.0.0.1:8000"
+  api_key: "dev-schedule-key"
+  usernames:
+    - admin
+  reminder_minutes: 60
+  timeout_seconds: 8
+
+schedule_inbox:
+  enabled: true
+  api_base: "http://127.0.0.1:8000"
+  api_key: "dev-schedule-key"
+  monitor_api_base: "http://127.0.0.1:8011"
+  integration_key: "dev-schedule-key"
+  usernames:
+    - admin
+  timeout_seconds: 8
+
+wechat_watcher:
+  enabled: false
+  api_base: "http://127.0.0.1:8011"
+  integration_key: "dev-schedule-key"
+  poll_seconds: 30
+  process_name: "Weixin.exe"
+  window_title: "微信"
+  baseline_on_first_run: true
+  max_seen_items: 1000
+
+logging:
+  # logs 表保留天数与最大行数（每轮扫描后自动修剪）
+  keep_days: 14
+  max_rows: 5000
+
+scoring:
+  enabled: true
+  # 影子模式：只记录分数与新旧判定分歧（logs 表 score disagreement），不改变行为。
+  # 观察一两周、按分歧日志调好阈值后，改为 false 启用三档拦截：
+  #   score >= notify_min → 正常提醒；>= inbox_min → 只进收件箱；否则忽略
+  shadow_mode: true
+  notify_min: 60
+  inbox_min: 40
+  negative_keywords:
+    - 公示
+    - 名单
+    - 总结
+    - 回顾
+    - 获奖
+    - 结果公布
+    - 表彰
+    - 圆满
+    - 风采
+
+dedup:
+  enabled: true
+  # 同一内容（换链接/换guid/跨号转发）在窗口天数内只提醒一次；过窗视为新一期活动
+  window_days: 14
+  # 标题短于此长度（如“通知”）区分度不够，不参与跨公众号合并
+  min_title_chars: 8
+
+safety:
+  auto_send: true
+  require_unique_email: true
+  require_schedule: true
+  min_keyword_hits: 1
+
+email:
+  notify_on_uncertain: true
+  subject_template: "勤工助学岗位申请 - {name} - 可用时间"
+  opportunity_subject_template: "勤工助学岗位申请 - {name} - {title}"
+  body_mode: "llm"
+  context_markdown: "config/personal_availability.md"
+  required_profile_fields:
+    - name
+    - phone
+    - contact_email
+  # 勤工助学季已结束（2026-07），暂停自动投递；下学期期末招聘重启时改回 true
+  auto_send_opportunities: false
+  auto_send_categories:
+    - work_study
+
+user:
+  name: "张三"
+  phone: "13800000000"
+  student_id: "00000000"
+  major: "示例专业"
+  contact_email: "you@example.com"
+  resume_path: "examples/resume.pdf"
+
+questionnaire_profile:
+  wechat: ""
+  college: ""
+  grade: ""
+
+form_runner:
+  helper_dir: "questionnaire_helper"
+  auto_submit: true
+  headless: true
+  timeout_seconds: 7200

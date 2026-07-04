@@ -1,0 +1,229 @@
+{
+  "name": "AI机会日报",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "0 21 * * *"
+            }
+          ]
+        }
+      },
+      "id": "schedule-daily-2100",
+      "name": "每天21:00触发",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        220,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "url": "http://127.0.0.1:8011/admin/opportunities",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "since",
+              "value": "={{ $now.minus({ hours: 24 }).toISO() }}"
+            },
+            {
+              "name": "limit",
+              "value": "200"
+            }
+          ]
+        },
+        "options": {
+          "timeout": 30000
+        }
+      },
+      "id": "fetch-opportunities",
+      "name": "拉取24小时机会",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        480,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "has-items",
+              "leftValue": "={{ Array.isArray($json.items) ? $json.items.length : Number($json.count || 0) }}",
+              "rightValue": 0,
+              "operator": {
+                "type": "number",
+                "operation": "gt"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "if-has-opportunities",
+      "name": "有新增机会？",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        740,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const items = Array.isArray($json.items) ? $json.items : [];\nitems.sort((a, b) => Number(b.score || 0) - Number(a.score || 0));\nconst compact = items.map((item) => ({\n  title: item.title,\n  category: item.category_label || item.category,\n  score: item.score,\n  score_reasons: item.score_reasons,\n  deadline: item.deadline,\n  activity_time: item.activity_time,\n  signup_url: item.signup_url,\n  article_url: item.article_url,\n  source_name: item.source_name,\n  schedule_status: item.schedule_status,\n  status: item.status,\n  created_at: item.created_at,\n}));\nreturn [{\n  json: {\n    count: compact.length,\n    subject: `AI机会日报：${compact.length}条待处理机会`,\n    prompt: [\n      '请把下面的校园机会整理成中文日报。',\n      '要求：按 category 分组；组内按 score 从高到低；每条用一句话说明价值、截止/活动时间、报名链接；临近截止小于48小时的条目前加[紧急]；末尾保留 score_reasons 的关键依据；不要编造字段外的信息。',\n      JSON.stringify(compact, null, 2),\n    ].join('\\n\\n'),\n  },\n}];"
+      },
+      "id": "prepare-digest-prompt",
+      "name": "准备日报Prompt",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1000,
+        220
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "REPLACE_WITH_OPENAI_COMPATIBLE_BASE_URL/v1/chat/completions",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ { model: 'REPLACE_WITH_OPENAI_MODEL', temperature: 0.2, messages: [ { role: 'system', content: '你是校园机会监测助手，只根据输入JSON生成简洁、可执行的中文日报。' }, { role: 'user', content: $json.prompt } ] } }}",
+        "options": {
+          "timeout": 60000
+        }
+      },
+      "id": "ai-llm-digest",
+      "name": "AI/LLM生成摘要",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1260,
+        220
+      ],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "REPLACE_WITH_OPENAI_CREDENTIAL_ID",
+          "name": "REPLACE_WITH_OPENAI_CREDENTIAL"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "fromEmail": "REPLACE_WITH_FROM_EMAIL",
+        "toEmail": "REPLACE_WITH_TO_EMAIL",
+        "subject": "={{ $('准备日报Prompt').item.json.subject }}",
+        "emailFormat": "text",
+        "text": "={{ $json.choices?.[0]?.message?.content || $json.choices?.[0]?.text || JSON.stringify($json, null, 2) }}",
+        "options": {}
+      },
+      "id": "send-daily-email",
+      "name": "发送日报邮件",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [
+        1520,
+        220
+      ],
+      "credentials": {
+        "smtp": {
+          "id": "REPLACE_WITH_SMTP_CREDENTIAL_ID",
+          "name": "REPLACE_WITH_SMTP_CREDENTIAL"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "每天21:00触发": {
+      "main": [
+        [
+          {
+            "node": "拉取24小时机会",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "拉取24小时机会": {
+      "main": [
+        [
+          {
+            "node": "有新增机会？",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "有新增机会？": {
+      "main": [
+        [
+          {
+            "node": "准备日报Prompt",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    },
+    "准备日报Prompt": {
+      "main": [
+        [
+          {
+            "node": "AI/LLM生成摘要",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI/LLM生成摘要": {
+      "main": [
+        [
+          {
+            "node": "发送日报邮件",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "timezone": "Asia/Shanghai"
+  },
+  "versionId": "daily-digest-v1",
+  "meta": {
+    "templateCredsSetupCompleted": false
+  },
+  "tags": []
+}

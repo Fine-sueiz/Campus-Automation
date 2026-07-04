@@ -1,0 +1,23 @@
+[Unit]
+Description=Campus schedule backend
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+Type=simple
+User=campus
+Group=campus
+WorkingDirectory=/opt/campus/schedule/backend
+# 先给默认值，再让 .env 覆盖（顺序即优先级：后写的 EnvironmentFile 赢）
+Environment=PATH=/opt/campus/schedule/.venv/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+Environment=SCHEDULE_DB_PATH=/opt/campus/schedule/data/schedule.db
+Environment=MONITOR_API_BASE=http://127.0.0.1:8011
+EnvironmentFile=-/opt/campus/schedule/.env
+ExecStart=/opt/campus/schedule/.venv/bin/python -m uvicorn app.main:app --host 127.0.0.1 --port 8000
+Restart=on-failure
+RestartSec=5
+NoNewPrivileges=true
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target

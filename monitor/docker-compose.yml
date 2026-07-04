@@ -1,0 +1,26 @@
+services:
+  app:
+    build: .
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      APP_ROOT: /app
+      HOST: 0.0.0.0
+      PORT: 8000
+      RUN_BACKGROUND: "true"
+      QUESTIONNAIRE_HELPER_DIR: /app/questionnaire_helper
+    volumes:
+      - ./data:/app/data
+      - ./config:/app/config
+      - ./examples:/app/examples:ro
+      - ./questionnaire_helper:/app/questionnaire_helper:ro
+    ports:
+      - "127.0.0.1:8000:8000"
+
+  cloudflared:
+    image: cloudflare/cloudflared:latest
+    restart: unless-stopped
+    depends_on:
+      - app
+    command: tunnel --no-autoupdate run --token ${CLOUDFLARE_TUNNEL_TOKEN}

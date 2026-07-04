@@ -1,0 +1,169 @@
+{
+  "name": "feed健康告警",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "hours",
+              "hoursInterval": 1
+            }
+          ]
+        }
+      },
+      "id": "schedule-hourly",
+      "name": "每小时触发",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        220,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "url": "http://127.0.0.1:8011/health",
+        "options": {
+          "timeout": 30000
+        }
+      },
+      "id": "fetch-health",
+      "name": "拉取监测健康状态",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        480,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const staticData = $getWorkflowStaticData('global');\nconst health = $input.first().json || {};\nconst feeds = Array.isArray(health.feeds) ? health.feeds : [];\nconst previous = staticData.feedAlertState || {};\nconst current = {};\nconst failing = [];\n\nfor (const feed of feeds) {\n  const failures = Number(feed.consecutive_failures || 0);\n  if (failures < 3) continue;\n  const key = String(feed.url || feed.name || feed.id || 'unknown-feed');\n  const item = {\n    key,\n    name: feed.name || key,\n    url: feed.url || '',\n    consecutive_failures: failures,\n    last_error: feed.last_error || '',\n    last_failed_at: feed.last_failed_at || '',\n    last_status: feed.last_status || '',\n  };\n  current[key] = item;\n  if (!previous[key]) failing.push(item);\n}\n\nconst recovered = Object.keys(previous)\n  .filter((key) => !current[key])\n  .map((key) => previous[key]);\n\nstaticData.feedAlertState = current;\nconst shouldAlert = failing.length > 0 || recovered.length > 0;\nconst lines = [];\nif (failing.length) {\n  lines.push('新进入故障的 feed：');\n  for (const feed of failing) {\n    lines.push(`- ${feed.name} (${feed.url}) 连续失败 ${feed.consecutive_failures} 次；最近错误：${feed.last_error || '无'}`);\n  }\n}\nif (recovered.length) {\n  lines.push('已恢复的 feed：');\n  for (const feed of recovered) {\n    lines.push(`- ${feed.name} (${feed.url})`);\n  }\n}\n\nreturn [{\n  json: {\n    shouldAlert,\n    failing,\n    recovered,\n    checked_at: new Date().toISOString(),\n    subject: failing.length ? `feed告警：${failing.length}个信源连续失败` : `feed恢复：${recovered.length}个信源恢复`,\n    text: lines.join('\\n'),\n    html: `<pre>${lines.join('\\n').replace(/[&<>]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]))}</pre>`,\n  },\n}];"
+      },
+      "id": "dedupe-feed-alert",
+      "name": "计算故障跳变",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        740,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "should-alert",
+              "leftValue": "={{ $json.shouldAlert }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "if-should-alert",
+      "name": "需要发告警？",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1000,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "fromEmail": "REPLACE_WITH_FROM_EMAIL",
+        "toEmail": "REPLACE_WITH_TO_EMAIL",
+        "subject": "={{ $json.subject }}",
+        "emailFormat": "html",
+        "html": "={{ $json.html }}",
+        "text": "={{ $json.text }}",
+        "options": {}
+      },
+      "id": "send-health-email",
+      "name": "发送feed告警邮件",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [
+        1260,
+        220
+      ],
+      "credentials": {
+        "smtp": {
+          "id": "REPLACE_WITH_SMTP_CREDENTIAL_ID",
+          "name": "REPLACE_WITH_SMTP_CREDENTIAL"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "每小时触发": {
+      "main": [
+        [
+          {
+            "node": "拉取监测健康状态",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "拉取监测健康状态": {
+      "main": [
+        [
+          {
+            "node": "计算故障跳变",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "计算故障跳变": {
+      "main": [
+        [
+          {
+            "node": "需要发告警？",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "需要发告警？": {
+      "main": [
+        [
+          {
+            "node": "发送feed告警邮件",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "timezone": "Asia/Shanghai"
+  },
+  "versionId": "feed-health-alert-v1",
+  "meta": {
+    "templateCredsSetupCompleted": false
+  },
+  "tags": []
+}

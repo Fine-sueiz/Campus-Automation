@@ -1,0 +1,154 @@
+{
+  "questionnaires": [
+    {
+      "label": "问卷1",
+      "url": "https://v.wjx.cn/vm/Qx1OeQ7.aspx",
+      "start_time": "2026-05-12 13:20:00"
+    },
+    {
+      "label": "问卷2",
+      "url": "https://v.wjx.cn/vm/Qcbj5A1.aspx",
+      "start_time": "2026-05-12 13:20:00"
+    }
+  ],
+  "timezone": "Asia/Shanghai",
+  "auto_submit": true,
+  "continue_on_fill_error": true,
+  "submit_delay_seconds": 0.5,
+  "min_submit_after_start_seconds": 0,
+  "close_delay_seconds": 2,
+  "save_qr_code_images": true,
+  "qr_code_output_dir": "saved_qr_codes",
+  "qr_code_wait_seconds": 5,
+  "manual_review_seconds": 3600,
+  "auto_agree_terms": true,
+  "terms_agreement_keywords": ["我已阅读并同意", "已阅读并同意", "阅读并同意", "我同意", "同意", "用户协议", "服务协议", "隐私政策", "协议条款", "同意协议"],
+  "terms_agreement_negative_keywords": ["不同意", "拒绝", "取消", "不同意协议"],
+  "terms_agreement_button_texts": ["同意并继续", "同意并提交", "同意并确认", "我已阅读并同意", "同意"],
+  "headless": false,
+  "slow_mo_ms": 0,
+  "profile": {},
+  "profile_fields": [
+    {
+      "label": "姓名",
+      "keywords": ["姓名", "名字", "请输入你的名字", "请输入姓名"],
+      "value": "张三"
+    },
+    {
+      "label": "学号",
+      "keywords": ["学号", "学生编号", "学生证号", "请输入你的学号", "请填写学生编号"],
+      "value": "00000000"
+    },
+    {
+      "label": "手机号",
+      "keywords": ["手机号", "手机号码", "联系电话", "联系方式", "请输入手机号"],
+      "value": "13800000000"
+    },
+    {
+      "label": "微信号",
+      "keywords": ["微信号", "微信", "请输入你的微信号", "请填写微信"],
+      "value": "wonderofwmj"
+    }
+  ],
+  "answers": [
+    {
+      "label": "学院",
+      "keywords": ["请选择你的学院", "你的学院", "您的学院", "你所在的学院", "您所在的学院", "所在学院", "学院", "院系"],
+      "type": "single",
+      "value": "统计与数据科学学院"
+    },
+    {
+      "label": "年级",
+      "keywords": ["请选择你的年级", "你的年级", "您的年级", "你所在的年级", "您所在的年级", "所在年级", "年级", "入学年级"],
+      "type": "single",
+      "value": "大一"
+    },
+    {
+      "label": "是否愿意参加",
+      "keywords": ["是否愿意参加", "参加还是不参加这个活动", "参加还是不参加", "是否参加", "是否参加这个活动", "是否报名参加"],
+      "type": "single",
+      "value": "参加",
+      "required": true
+    }
+  ],
+  "simple_validation_rules": [
+    {
+      "keywords": ["这题请选第二项", "请选择第二项", "选第二项", "请选择第2项"],
+      "type": "single",
+      "value": "选项2"
+    },
+    {
+      "keywords": ["请全选", "全选"],
+      "type": "multiple",
+      "value": ["选项1", "选项2", "选项3"]
+    },
+    {
+      "keywords": ["此题请选择A", "请选择A", "选A"],
+      "type": "single",
+      "value": "A"
+    },
+    {
+      "keywords": ["此题请选择B", "请选择B", "选B"],
+      "type": "single",
+      "value": "B"
+    }
+  ],
+  "ml_classifier": {
+    "enabled": false,
+    "model_path": "question_model_new.json",
+    "confidence_threshold": 0.75,
+    "label_answers": {
+      "name": {
+        "type": "text",
+        "value": "张三"
+      },
+      "student_id": {
+        "type": "text",
+        "value": "00000000"
+      },
+      "wechat": {
+        "type": "text",
+        "value": "wonderofwmj"
+      },
+      "phone": {
+        "type": "text",
+        "value": "13800000000"
+      },
+      "college": {
+        "type": "single",
+        "value": "统计与数据科学学院"
+      },
+      "grade": {
+        "type": "single",
+        "value": "大一"
+      },
+      "validation_a": {
+        "type": "single",
+        "value": "A"
+      },
+      "validation_b": {
+        "type": "single",
+        "value": "B"
+      }
+    }
+  },
+  "llm_validation": {
+    "enabled": true,
+    "mode": "all_unanswered",
+    "base_url": "https://api.deepseek.com/",
+    "api_key_env": "DEEPSEEK_API_KEY",
+    "model": "deepseek-v4-flash",
+    "timeout_seconds": 20,
+    "confidence_threshold": 0.7,
+    "max_candidates": 20,
+    "max_text_length": 500,
+    "temperature": 0,
+    "json_mode": true,
+    "local_routing": true,
+    "share_local_values": false,
+    "trigger_keywords": ["验证", "请选择", "此题", "本题", "为了验证", "计算", "等于", "多少", "机器人"],
+    "privacy_keywords": ["姓名", "名字", "学号", "学生编号", "学生证号", "手机号", "手机号码", "联系电话", "联系方式", "微信", "微信号", "身份证", "证件号", "邮箱", "邮件", "地址", "宿舍", "班级", "学院", "院系", "年级"]
+  },
+  "submit_button_texts": ["提交", "确认提交", "Submit", "完成", "确认提交问卷", "提交问卷"],
+  "submit_confirmation_button_texts": ["确认提交", "确定", "确认"]
+}

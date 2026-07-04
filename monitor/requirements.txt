@@ -1,0 +1,20 @@
+PyYAML>=6.0
+requests>=2.31
+beautifulsoup4>=4.12
+fastapi>=0.115
+uvicorn[standard]>=0.30
+pycryptodome>=3.20
+playwright>=1.44.0
+tzdata>=2024.1
+httpx>=0.28
+lark-oapi>=1.6.1
+pywebpush>=2.0.0
+pywinauto>=0.6.9; platform_system == "Windows"
+pillow>=12.0; platform_system == "Windows"
+winrt-runtime>=3.2.1; platform_system == "Windows"
+winrt-Windows.Foundation>=3.2.1; platform_system == "Windows"
+winrt-Windows.Foundation.Collections>=3.2.1; platform_system == "Windows"
+winrt-Windows.Globalization>=3.2.1; platform_system == "Windows"
+winrt-Windows.Graphics.Imaging>=3.2.1; platform_system == "Windows"
+winrt-Windows.Media.Ocr>=3.2.1; platform_system == "Windows"
+winrt-Windows.Storage.Streams>=3.2.1; platform_system == "Windows"

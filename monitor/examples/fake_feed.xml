@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<rss version="2.0">
+  <channel>
+    <title>本地测试公众号</title>
+    <item>
+      <title>下学期勤工助学岗位招聘通知</title>
+      <link>examples/fake_article.html</link>
+      <guid>fake-001</guid>
+      <pubDate>Sat, 06 Jun 2026 10:00:00 +0800</pubDate>
+      <description><![CDATA[勤工助学岗位报名，请发送邮件到 job@example.edu.cn。]]></description>
+    </item>
+  </channel>
+</rss>

@@ -1,0 +1,139 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#166534" />
+    <title>校园机会雷达</title>
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <link rel="stylesheet" href="/assets/app.css" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <header class="topbar">
+        <div>
+          <p class="eyebrow">Campus Radar</p>
+          <h1>校园机会雷达</h1>
+        </div>
+        <button id="logoutBtn" class="icon-button hidden" title="退出登录">退出</button>
+      </header>
+
+      <main>
+        <section id="authView" class="panel auth-panel">
+          <div class="auth-copy">
+            <h2>七人小队的机会监测台</h2>
+            <p>登录后填写课表和个人资料，系统会按每个人的空闲时间推送志愿活动、勤工助学、竞赛和讲座。</p>
+          </div>
+          <div class="auth-grid">
+            <form id="loginForm" class="card form-card">
+              <h3>登录</h3>
+              <label>账号<input name="username" autocomplete="username" required /></label>
+              <label>密码<input name="password" type="password" autocomplete="current-password" required /></label>
+              <button type="submit">登录</button>
+              <p class="hint">默认管理员：admin / admin123456，本地测试后请尽快改配置。</p>
+            </form>
+            <form id="registerForm" class="card form-card">
+              <h3>加入小队</h3>
+              <label>邀请码<input name="invite_code" value="TEAM2026" required /></label>
+              <label>账号<input name="username" autocomplete="username" required /></label>
+              <label>昵称<input name="display_name" required /></label>
+              <label>密码<input name="password" type="password" autocomplete="new-password" required /></label>
+              <button type="submit">注册并登录</button>
+            </form>
+          </div>
+        </section>
+
+        <section id="mainView" class="hidden">
+          <nav class="tabs" aria-label="功能导航">
+            <button data-tab="feed" class="active">机会</button>
+            <button data-tab="profile">资料</button>
+            <button data-tab="schedule">课表</button>
+            <button data-tab="notify">通知</button>
+            <button data-tab="admin" id="adminTab" class="hidden">管理</button>
+          </nav>
+
+          <section id="feedTab" class="tab-page">
+            <div class="toolbar">
+              <div>
+                <h2>我的机会</h2>
+                <p id="welcomeText" class="muted"></p>
+              </div>
+              <button id="refreshBtn" type="button">刷新</button>
+            </div>
+            <div id="opportunityList" class="opportunity-list"></div>
+          </section>
+
+          <section id="profileTab" class="tab-page hidden">
+            <form id="profileForm" class="panel form-grid">
+              <h2>个人资料</h2>
+              <label>姓名<input name="name" /></label>
+              <label>手机号<input name="phone" /></label>
+              <label>学号<input name="student_id" /></label>
+              <label>邮箱<input name="email" type="email" /></label>
+              <label>学院<input name="college" /></label>
+              <label>年级<input name="grade" /></label>
+              <label>微信<input name="wechat" /></label>
+              <label class="wide">常用问卷答案 JSON<textarea name="answers" rows="6" placeholder='[{"label":"政治面貌","keywords":["政治面貌"],"type":"single","value":"共青团员"}]'></textarea></label>
+              <button type="submit">保存资料</button>
+            </form>
+          </section>
+
+          <section id="scheduleTab" class="tab-page hidden">
+            <form id="scheduleForm" class="panel form-grid">
+              <h2>课表占用时间</h2>
+              <label>每天开始<input name="day_start" value="08:00" /></label>
+              <label>每天结束<input name="day_end" value="22:00" /></label>
+              <label class="wide">课程/忙碌时间<textarea name="busy_text" rows="12" placeholder="周一 08:00-09:40 高数&#10;周三 14:00-16:00 实验"></textarea></label>
+              <button type="submit">保存课表</button>
+            </form>
+          </section>
+
+          <section id="notifyTab" class="tab-page hidden">
+            <div class="panel">
+              <h2>手机通知</h2>
+              <p class="muted">本地测试可用 fake 模式保存订阅；真实手机推送需要 HTTPS 和 VAPID key。</p>
+              <div class="notify-actions">
+                <button id="enablePushBtn" type="button">授权通知</button>
+                <button id="testPushBtn" type="button">发送测试通知</button>
+              </div>
+              <pre id="pushStatus" class="status-box"></pre>
+            </div>
+          </section>
+
+          <section id="adminTabPage" class="tab-page hidden">
+            <div class="panel">
+              <div class="toolbar">
+                <div>
+                  <h2>管理员</h2>
+                  <p class="muted">本地维护 feed、查看用户和日志；服务器部署等下学期再做。</p>
+                </div>
+                <button id="scanBtn" type="button">本地扫描一次</button>
+              </div>
+              <form id="feedForm" class="feed-form">
+                <input name="name" placeholder="公众号名称" required />
+                <input name="url" placeholder="feed URL 或 examples/fake_volunteer_feed.xml" required />
+                <button type="submit">添加 feed</button>
+              </form>
+              <div class="admin-grid">
+                <div>
+                  <h3>Feed</h3>
+                  <div id="feedList"></div>
+                </div>
+                <div>
+                  <h3>用户</h3>
+                  <div id="userList"></div>
+                </div>
+                <div class="wide">
+                  <h3>日志</h3>
+                  <pre id="logList" class="status-box"></pre>
+                </div>
+              </div>
+            </div>
+          </section>
+        </section>
+      </main>
+      <div id="toast" class="toast hidden"></div>
+    </div>
+    <script src="/assets/app.js"></script>
+  </body>
+</html>

@@ -1,0 +1,50 @@
+timezone: Asia/Shanghai
+day_start: "08:00"
+day_end: "22:00"
+
+days:
+  monday:
+    label: 周一
+    busy:
+      - title: "周一 1-2节 示例课程"
+        start: "08:15"
+        end: "09:50"
+      - title: "周一 5-6节 示例实验"
+        start: "13:30"
+        end: "15:05"
+  tuesday:
+    label: 周二
+    busy:
+      - title: "周二 3-4节 示例课程"
+        start: "10:10"
+        end: "11:45"
+  wednesday:
+    label: 周三
+    busy:
+      - title: "周三 1-2节 示例课程"
+        start: "08:15"
+        end: "09:50"
+      - title: "周三 7-8节 示例活动"
+        start: "15:25"
+        end: "17:00"
+  thursday:
+    label: 周四
+    busy:
+      - title: "周四 5-6节 示例课程"
+        start: "13:30"
+        end: "15:05"
+  friday:
+    label: 周五
+    busy:
+      - title: "周五 3-4节 示例课程"
+        start: "10:10"
+        end: "11:45"
+      - title: "周五 9-10节 示例讲座"
+        start: "18:00"
+        end: "19:35"
+  saturday:
+    label: 周六
+    busy: []
+  sunday:
+    label: 周日
+    busy: []

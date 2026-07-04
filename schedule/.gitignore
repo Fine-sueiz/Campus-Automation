@@ -1,0 +1,16 @@
+.venv/
+node_modules/
+data/
+logs/
+__pycache__/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+dist/
+*.pyc
+.env
+web/.env.local
+web/dist/
+outputs/
+backups/
+*.tsbuildinfo

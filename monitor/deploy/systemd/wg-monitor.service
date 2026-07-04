@@ -1,0 +1,24 @@
+[Unit]
+Description=Campus WeChat opportunity monitor
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+Type=simple
+User=campus
+Group=campus
+WorkingDirectory=/opt/campus/monitor
+# 先给安全默认值，再让 .env 覆盖（顺序即优先级：后写的 EnvironmentFile 赢）
+Environment=PATH=/opt/campus/monitor/.venv/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+Environment=APP_ROOT=/opt/campus/monitor HOST=127.0.0.1 PORT=8011
+Environment=RUN_BACKGROUND=true CHECK_INTERVAL_SECONDS=180
+Environment=FORM_RUNNER_MODE=fake WEB_PUSH_MODE=fake
+EnvironmentFile=-/opt/campus/monitor/.env
+ExecStart=/opt/campus/monitor/.venv/bin/python run_server.py
+Restart=on-failure
+RestartSec=5
+NoNewPrivileges=true
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target

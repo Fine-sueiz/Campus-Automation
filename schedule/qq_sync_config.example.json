@@ -1,0 +1,19 @@
+{
+    "enabled":  true,
+    "auto_create_min_confidence":  0.82,
+    "groups":  [
+                   {
+                       "group_name":  "示例课程群",
+                       "group_id":  "",
+                       "course_name":  "示例课程",
+                       "teacher_names":  [
+                                             "张老师"
+                                         ],
+                       "teacher_ids":  [
+
+                                       ],
+                       "default_category":  "课程",
+                       "reminder_minutes":  1440
+                   }
+               ]
+}

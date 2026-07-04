@@ -1,0 +1,159 @@
+{
+  "name": "学习通登录态探测",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "30 7 * * *"
+            }
+          ]
+        }
+      },
+      "id": "schedule-daily-0730",
+      "name": "每天07:30触发",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        220,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://127.0.0.1:8000/api/integrations/xuexitong/sync",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "options": {
+          "timeout": 60000,
+          "response": {
+            "response": {
+              "fullResponse": true,
+              "neverError": true
+            }
+          }
+        }
+      },
+      "id": "sync-xuexitong",
+      "name": "触发学习通同步",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        480,
+        300
+      ],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "REPLACE_WITH_XUEXITONG_CREDENTIAL_ID",
+          "name": "REPLACE_WITH_XUEXITONG_API_KEY_CREDENTIAL"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "sync-failed",
+              "leftValue": "={{ Boolean($json.error) || Number($json.statusCode || 200) >= 400 || $json.body?.ok === false || $json.body?.login_ok === false || $json.body?.login_status === 'expired' || $json.body?.status === 'login_required' }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "if-login-problem",
+      "name": "同步失败或登录态异常？",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        740,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "fromEmail": "REPLACE_WITH_FROM_EMAIL",
+        "toEmail": "REPLACE_WITH_TO_EMAIL",
+        "subject": "学习通登录态可能过期",
+        "emailFormat": "text",
+        "text": "={{ `学习通同步失败或返回登录态异常。\\n\\n请按 docs/server_migration.md 第8节重新登录/刷新 profile。\\n\\nHTTP状态：${$json.statusCode || 'unknown'}\\n返回：${JSON.stringify($json.body || $json, null, 2)}` }}",
+        "options": {}
+      },
+      "id": "send-xuexitong-email",
+      "name": "发送学习通告警邮件",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [
+        1000,
+        220
+      ],
+      "credentials": {
+        "smtp": {
+          "id": "REPLACE_WITH_SMTP_CREDENTIAL_ID",
+          "name": "REPLACE_WITH_SMTP_CREDENTIAL"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "每天07:30触发": {
+      "main": [
+        [
+          {
+            "node": "触发学习通同步",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "触发学习通同步": {
+      "main": [
+        [
+          {
+            "node": "同步失败或登录态异常？",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "同步失败或登录态异常？": {
+      "main": [
+        [
+          {
+            "node": "发送学习通告警邮件",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "timezone": "Asia/Shanghai"
+  },
+  "versionId": "xuexitong-probe-v1",
+  "meta": {
+    "templateCredsSetupCompleted": false
+  },
+  "tags": []
+}

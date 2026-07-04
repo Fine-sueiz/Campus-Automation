@@ -1,0 +1,19 @@
+[Unit]
+Description=Headless Chromium for Xuexitong CDP sync
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+Type=simple
+User=campus
+Group=campus
+WorkingDirectory=/opt/campus/schedule
+Environment=PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/snap/bin
+ExecStart=/usr/bin/env chromium --headless=new --remote-debugging-port=9222 --remote-debugging-address=127.0.0.1 --user-data-dir=/opt/campus/schedule/data/chrome-xuexitong-profile --no-first-run --no-default-browser-check --disable-dev-shm-usage https://i.chaoxing.com/
+Restart=on-failure
+RestartSec=5
+NoNewPrivileges=true
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<rss version="2.0">
+  <channel>
+    <title>本地志愿活动测试</title>
+    <item>
+      <title>图书馆志愿服务活动招募通知</title>
+      <link>examples/fake_volunteer_article.html</link>
+      <guid>fake-volunteer-001</guid>
+      <pubDate>Sun, 07 Jun 2026 10:00:00 +0800</pubDate>
+      <description><![CDATA[志愿活动招募，周二 14:00-16:00，地点图书馆一楼，报名链接 https://v.wjx.cn/vm/testVolunteer.aspx]]></description>
+    </item>
+  </channel>
+</rss>
