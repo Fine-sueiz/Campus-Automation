@@ -1,25 +1,26 @@
 # Campus Automation
+This project can identify the articles on public accounts, capture the important information as the starting time of an activity, the location, sign-up form link. After that, it will send an email to you to ask about whether you want to participate in it. If your answer is yes, it will fill in the questionnaire based on the information you have given. And if you sign up successfully, this event will also be added to our custom calendar to remind you when to join.
 
-这是三个校园自动化项目的脱敏公开版。仓库中的数据、密钥、个人信息、本地日志、构建产物和浏览器运行产物已移除；实际使用前需要按各子项目的 `.env.example` 自行配置本地 `.env`。
+## Subproject
 
-## 子项目
+- `monitor/`: Campus public account opportunity monitoring service. It scans articles from public accounts/RSS sources, identifies opportunities like work-study and volunteer services based on keywords and model scoring, and then initiates a confirmation process via email or interface.
+- `schedule/`: Personal schedule and course arrangement service. It provides a schedule interface and can receive candidate events written by external systems.
+- `questionnaire-helper/`: A helper for automatically filling out questionnaires and forms. It’s responsible for opening forms, filling in fields, and completing automated submission processes according to the configuration; the public version doesn’t include the MinGit toolchain, browser data, logs, or real form data.
 
-- `monitor/`：校园公众号机会监测服务。它从公众号/RSS 来源扫描文章，按关键词和模型评分识别勤工助学、志愿服务等机会，再通过邮件或接口发起确认流程。
-- `schedule/`：个人日程与课程安排服务。它提供日程接口，并可接收外部系统写入的候选事件；公开版补充了 `qq_sync_config.example.json` 作为 QQ 群消息同步配置示例。
-- `questionnaire-helper/`：问卷和表单自动填写助手。它负责按配置打开表单、填写字段和执行自动化提交流程；公开版不包含 MinGit 工具链、浏览器数据、日志或真实表单数据。
+## Project relationship
+The typical workflow is: `monitor` scans public account articles -> scores and filters opportunities -> confirms via email or manually -> calls `schedule` to write into the calendar; `questionnaire-helper` is an independent form-filling tool that can also be called by the upper-level process when a registration form needs to be filled out.
 
-## 项目关系
+## Configuration Instructions
+- `monitor/.env.example` keeps the original config keys and structure, but real emails, SMTP auth codes, API keys, Feishu, Cloudflare, and other secrets have all been replaced with placeholders.
+- `monitor/config/app.yml`, `monitor/config/schedule.yml`, and `monitor/config/personal_availability.md` have been replaced with general examples.
+- `schedule/qq_sync_config.example.json` is a public example; the real `data/qq_sync_config.json` is not released with the repo.
+- The `.gitignore` in the root and sub-projects will continue to ignore `.env`, `data/`, `logs/`, databases, virtual environments, and build artifacts.
 
-典型链路是：`monitor` 扫描公众号文章 -> 评分和筛选机会 -> 邮件确认或人工确认 -> 调用 `schedule` 写入日程；`questionnaire-helper` 则作为独立的表单自动填写能力，也可被上层流程在需要填写报名表时调用。
-
-## 配置说明
-
-- `monitor/.env.example` 保留了源配置的键名和结构，真实邮箱、SMTP 授权码、API key、飞书和 Cloudflare 等密钥均已替换为占位符。
-- `monitor/config/app.yml`、`monitor/config/schedule.yml`、`monitor/config/personal_availability.md` 已替换为通用示例。
-- `schedule/qq_sync_config.example.json` 是公开示例，真实 `data/qq_sync_config.json` 不随仓库发布。
-- 根目录和各子项目的 `.gitignore` 会继续忽略 `.env`、`data/`、`logs/`、数据库、虚拟环境和构建产物。
-
-更多部署和集成说明见：
+For more deployment and integration instructions, check out:
 
 - `monitor/docs/server_migration.md`
 - `monitor/docs/n8n_integration.md`
+
+## About design trade-offs and safety
+Q: Why didn't you choose to detect activity and just submit the survey?
+A: Some volunteer activities might not be very valuable. If we just submit the application directly, it might not be the kind of activities we want to do. That would be a waste of time, and if we forget about the activity later, it could get us blacklisted and affect signing up for future activities. So we came up with sending you an email to confirm whether you want to sign up or not. It can let you know this event exists and also let you decide what exactly to choose.
