@@ -24,3 +24,5 @@ For more deployment and integration instructions, check out:
 ## About design trade-offs and safety
 Q: Why didn't you choose to detect activity and just submit the survey?
 A: Some volunteer activities might not be very valuable. If we just submit the application directly, it might not be the kind of activities we want to do. That would be a waste of time, and if we forget about the activity later, it could get us blacklisted and affect signing up for future activities. So we came up with sending you an email to confirm whether you want to sign up or not. It can let you know this event exists and also let you decide what exactly to choose.
+Q: What if the program does something wrong while I'm still testing it?
+A: It runs in dry-run/fake mode by default—emails are just logged, not actually sent, and forms are just simulated, not really submitted. You can watch it run through completely to make sure everything’s fine, then manually switch to actually sending.
